@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { supabase, isSupabaseConfigured } from './lib/supabase.js'
 import Login from './components/Login.jsx'
+import Layout from './components/Layout.jsx'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -36,17 +37,10 @@ function App() {
   }
 
   return (
-    <div style={box}>
-      <h1>Привет! 👋</h1>
-      <p>Ты вошёл как {session.user.email}</p>
-      <p>Скоро здесь появятся задачи.</p>
-      <button
-        onClick={() => supabase.auth.signOut()}
-        style={{ padding: '12px 20px', fontSize: '16px', borderRadius: '10px' }}
-      >
-        Выйти
-      </button>
-    </div>
+    <Layout
+      email={session.user.email}
+      onSignOut={() => supabase.auth.signOut()}
+    />
   )
 }
 
