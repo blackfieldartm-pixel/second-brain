@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { toDateInput, toTimeInput, buildDue } from '../lib/dateUtils.js'
+import Subtasks from './Subtasks.jsx'
 import './taskdetails.css'
 
 const PRIORITIES = [
@@ -9,7 +10,14 @@ const PRIORITIES = [
   { value: 3, label: 'Высокий' },
 ]
 
-export default function TaskDetails({ task, projects, onSave, onDelete, onClose }) {
+export default function TaskDetails({
+  task,
+  projects,
+  onSave,
+  onDelete,
+  onClose,
+  onSubtasksChange,
+}) {
   const [title, setTitle] = useState(task.title)
   const [note, setNote] = useState(task.note || '')
   const [date, setDate] = useState(toDateInput(task.due_at))
@@ -45,7 +53,7 @@ export default function TaskDetails({ task, projects, onSave, onDelete, onClose 
   }
 
   async function handleDelete() {
-    if (!window.confirm('Удалить задачу?')) return
+    if (!window.confirm('Удалить задачу вместе с подзадачами?')) return
     setBusy(true)
     setError('')
     try {
@@ -81,6 +89,8 @@ export default function TaskDetails({ task, projects, onSave, onDelete, onClose 
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
+
+        <Subtasks parent={task} onCountChange={onSubtasksChange} />
 
         <label className="field-label">Срок (дата и время, время можно не указывать)</label>
         <div className="due-row">

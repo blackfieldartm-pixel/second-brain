@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { fetchTasks, addTask, setTaskDone, updateTask, deleteTask } from '../lib/tasksApi.js'
+import {
+  fetchTasks,
+  fetchSubtaskCounts,
+  addTask,
+  setTaskDone,
+  updateTask,
+  deleteTask,
+} from '../lib/tasksApi.js'
 import { fetchProjects, addProject } from '../lib/projectsApi.js'
 import { formatDue, isOverdue } from '../lib/dateUtils.js'
 import ProjectBar from '../components/ProjectBar.jsx'
@@ -19,6 +26,7 @@ export default function Tasks() {
   const [projects, setProjects] = useState([])
   const [activeId, setActiveId] = useState(null)
   const [tasks, setTasks] = useState([])
+  const [subCounts, setSubCounts] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [title, setTitle] = useState('')
@@ -35,9 +43,14 @@ export default function Tasks() {
     let cancelled = false
     setLoading(true)
     setTasks([])
+    setSubCounts({})
     fetchTasks(activeId)
-      .then((data) => {
-        if (!cancelled) setTasks(data)
+      .then(async (data) => {
+        const counts = await fetchSubtaskCounts(data.map((t) => t.id)).catch(() => ({}))
+        if (!cancelled) {
+          setTasks(data)
+          setSubCounts(counts)
+        }
       })
       .catch((e) => {
         if (!cancelled) setError('Не удалось загрузить задачи: ' + e.message)
@@ -111,6 +124,10 @@ export default function Tasks() {
     setSelected(null)
   }
 
+  function handleSubtasksChange(parentId, counts) {
+    setSubCounts((prev) => ({ ...prev, [parentId]: counts }))
+  }
+
   const activeProject = projects.find((p) => p.id === activeId)
   const heading = activeProject
     ? (activeProject.emoji || '📁') + ' ' + activeProject.title
@@ -123,6 +140,13 @@ export default function Tasks() {
     const isDone = task.status === 'done'
     const due = formatDue(task)
     const overdue = isOverdue(task)
+    const sub = subCounts[task.id]
+
+    const parts = []
+    if (due) parts.push(due)
+    if (sub && sub.total > 0) parts.push('☑ ' + sub.done + '/' + sub.total)
+    if (task.note) parts.push('📝')
+
     return (
       <li key={task.id} className={'task-item p' + task.priority + (isDone ? ' done' : '')}>
         <button
@@ -135,12 +159,8 @@ export default function Tasks() {
         </button>
         <button type="button" className="task-body" onClick={() => setSelected(task)}>
           <span className="task-title">{task.title}</span>
-          {(due || task.note) && (
-            <span className={'task-meta' + (overdue ? ' overdue' : '')}>
-              {due}
-              {due && task.note ? ' · ' : ''}
-              {task.note ? '📝' : ''}
-            </span>
+          {parts.length > 0 && (
+            <span className={'task-meta' + (overdue ? ' overdue' : '')}>{parts.join(' · ')}</span>
           )}
         </button>
       </li>
@@ -196,6 +216,7 @@ export default function Tasks() {
           onSave={handleSaveTask}
           onDelete={handleDeleteTask}
           onClose={() => setSelected(null)}
+          onSubtasksChange={handleSubtasksChange}
         />
       )}
     </div>
