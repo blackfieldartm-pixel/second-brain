@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { SYSTEM_VIEWS } from '../lib/views.js'
 
 const EMOJIS = ['📁', '💼', '🏠', '👤', '🎯', '📚', '💡', '🛒', '✈️', '❤️']
 const COLORS = ['#2563eb', '#16a34a', '#dc2626', '#d97706', '#9333ea', '#0891b2']
@@ -44,15 +45,20 @@ export default function ProjectBar({ projects, activeId, onSelect, onCreate }) {
   return (
     <div>
       <div className="project-bar">
-        <button
-          type="button"
-          className={'chip' + (activeId === null ? ' active' : '')}
-          style={chipStyle('#2563eb', activeId === null)}
-          onClick={() => onSelect(null)}
-        >
-          📥 Входящие
-        </button>
+        {SYSTEM_VIEWS.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            className={'chip' + (v.id === activeId ? ' active' : '')}
+            style={chipStyle(v.color, v.id === activeId)}
+            onClick={() => onSelect(v.id)}
+          >
+            {v.emoji + ' ' + v.label}
+          </button>
+        ))}
+      </div>
 
+      <div className="project-bar">
         {projects.map((p) => (
           <button
             key={p.id}

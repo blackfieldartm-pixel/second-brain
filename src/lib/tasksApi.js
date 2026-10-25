@@ -1,24 +1,49 @@
 import { supabase } from './supabase.js'
+import { dayStartIso } from './dateUtils.js'
 
-// Задачи проекта; если projectId пустой, то задачи «Входящих»
-export async function fetchTasks(projectId) {
+// Задачи для выбранной папки или проекта.
+// view: 'inbox', 'today', 'tomorrow', 'soon', 'done' или идентификатор проекта
+export async function fetchTasksForView(view) {
   let query = supabase
     .from('tasks')
     .select('*')
     .is('parent_id', null)
     .is('deleted_at', null)
 
-  query = projectId ? query.eq('project_id', projectId) : query.is('project_id', null)
+  if (view === 'inbox') {
+    query = query.is('project_id', null)
+  } else if (view === 'today') {
+    // сегодняшние и просроченные
+    query = query.eq('status', 'open').lt('due_at', dayStartIso(1))
+  } else if (view === 'tomorrow') {
+    query = query
+      .eq('status', 'open')
+      .gte('due_at', dayStartIso(1))
+      .lt('due_at', dayStartIso(2))
+  } else if (view === 'soon') {
+    query = query.eq('status', 'open').gte('due_at', dayStartIso(2))
+  } else if (view === 'done') {
+    query = query.eq('status', 'done')
+  } else {
+    query = query.eq('project_id', view)
+  }
 
-  const { data, error } = await query.order('created_at', { ascending: false })
+  if (view === 'done') {
+    query = query.order('completed_at', { ascending: false }).limit(100)
+  } else {
+    query = query.order('created_at', { ascending: false })
+  }
+
+  const { data, error } = await query
   if (error) throw error
   return data
 }
 
-export async function addTask(title, projectId) {
+// extra: дополнительные поля, например срок
+export async function addTask(title, projectId, extra = {}) {
   const { data, error } = await supabase
     .from('tasks')
-    .insert({ title, project_id: projectId || null })
+    .insert({ title, project_id: projectId || null, ...extra })
     .select()
     .single()
   if (error) throw error

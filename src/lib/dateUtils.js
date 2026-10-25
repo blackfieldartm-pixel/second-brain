@@ -6,6 +6,37 @@ function dateKey(d) {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
 }
 
+// Начало дня по местному времени: 0 — сегодня, 1 — завтра, 2 — послезавтра
+function startOfDay(offsetDays) {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() + offsetDays)
+  return d
+}
+
+export function dayStartIso(offsetDays) {
+  return startOfDay(offsetDays).toISOString()
+}
+
+// Срок «на весь день» для выбранного дня (храним 12:00 по местному времени)
+export function dueAtDay(offsetDays) {
+  const d = startOfDay(offsetDays)
+  d.setHours(12, 0, 0, 0)
+  return { due_at: d.toISOString(), all_day: true }
+}
+
+// Попадает ли срок в папку «Сегодня», «Завтра» или «Скоро»
+export function dueInView(iso, view) {
+  if (!iso) return false
+  const t = new Date(iso).getTime()
+  const s1 = startOfDay(1).getTime()
+  const s2 = startOfDay(2).getTime()
+  if (view === 'today') return t < s1
+  if (view === 'tomorrow') return t >= s1 && t < s2
+  if (view === 'soon') return t >= s2
+  return false
+}
+
 // 'ГГГГ-ММ-ДД' для поля даты
 export function toDateInput(iso) {
   if (!iso) return ''
