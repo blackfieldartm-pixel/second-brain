@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   fetchTasksForView,
   fetchSubtaskCounts,
@@ -10,11 +10,33 @@ import {
 import { fetchProjects, addProject, updateProject, deleteProject } from '../lib/projectsApi.js'
 import { formatDue, isOverdue, dueAtDay, dueInView } from '../lib/dateUtils.js'
 import { SYSTEM_VIEWS, isSystemView } from '../lib/views.js'
+import { useAutoRefresh } from '../lib/useSync.js'
 import ProjectBar from '../components/ProjectBar.jsx'
 import ProjectEditor from '../components/ProjectEditor.jsx'
 import TaskDetails from '../components/TaskDetails.jsx'
 import './tasks.css'
 import '../components/projecteditor.css'
+
+// Ключи локального кэша: последние данные для мгновенного открытия
+const CACHE_TASKS = 'sb2_tasks_'
+const CACHE_PROJECTS = 'sb2_projects'
+
+function readCache(key) {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function writeCache(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // память недоступна или переполнена — просто работаем без кэша
+  }
+}
 
 // Сначала задачи с ближайшим сроком, потом без срока; при равенстве выше приоритет, потом новее
 function sortOpen(a, b) {
@@ -53,31 +75,51 @@ export default function Tasks() {
   const [adding, setAdding] = useState(false)
   const [selected, setSelected] = useState(null)
   const [editingProject, setEditingProject] = useState(false)
-
+  const [refreshKey, setRefreshKey] = useState(0)
+  const viewRef = useRef(view)
+  viewRef.current = view
   const isSystem = isSystemView(view)
   const projectId = isSystem ? null : view
 
+  const refresh = useCallback(() => setRefreshKey((k) => k + 1), [])
+  const online = useAutoRefresh(refresh)
+
+  // Проекты: сначала из кэша, затем свежие из базы
   useEffect(() => {
+    const cached = readCache(CACHE_PROJECTS)
+    if (cached) setProjects(cached)
     fetchProjects()
-      .then(setProjects)
-      .catch((e) => setError('Не удалось загрузить проекты: ' + e.message))
+      .then((data) => {
+        setProjects(data)
+        writeCache(CACHE_PROJECTS, data)
+      })
+      .catch((e) => {
+        if (!cached) setError('Не удалось загрузить проекты: ' + e.message)
+      })
   }, [])
 
+  // Задачи папки: сначала из кэша, затем свежие из базы
   useEffect(() => {
     let cancelled = false
     setLoading(true)
     setTasks([])
     setSubCounts({})
+    const cached = readCache(CACHE_TASKS + view)
+    if (cached) {
+      setTasks(cached)
+      setLoading(false)
+    }
     fetchTasksForView(view)
       .then(async (data) => {
         const counts = await fetchSubtaskCounts(data.map((t) => t.id)).catch(() => ({}))
-        if (!cancelled) {
-          setTasks(data)
-          setSubCounts(counts)
-        }
+        if (cancelled) return
+        setTasks(data)
+        setSubCounts(counts)
+        writeCache(CACHE_TASKS + view, data)
       })
       .catch((e) => {
-        if (!cancelled) setError('Не удалось загрузить задачи: ' + e.message)
+        // если показали кэш, ошибку не пугаем: данные на экране, индикатор покажет «нет связи»
+        if (!cancelled && !cached) setError('Не удалось загрузить задачи: ' + e.message)
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -86,6 +128,26 @@ export default function Tasks() {
       cancelled = true
     }
   }, [view])
+
+  // Тихое обновление по событиям: realtime, возврат в приложение, появление сети
+  useEffect(() => {
+    if (refreshKey === 0) return
+    const viewId = viewRef.current
+    fetchProjects()
+      .then((data) => {
+        setProjects(data)
+        writeCache(CACHE_PROJECTS, data)
+      })
+      .catch(() => {})
+    fetchTasksForView(viewId)
+      .then(async (data) => {
+        const counts = await fetchSubtaskCounts(data.map((t) => t.id)).catch(() => ({}))
+        setTasks(data)
+        setSubCounts(counts)
+        writeCache(CACHE_TASKS + viewId, data)
+      })
+      .catch(() => {})
+  }, [refreshKey])
 
   function handleSelect(id) {
     setError('')
@@ -183,12 +245,10 @@ export default function Tasks() {
   const heading = systemView
     ? systemView.emoji + ' ' + systemView.label
     : activeProject
-      ? (activeProject.emoji || '📁') + ' ' + activeProject.title
-      : ''
-
+    ? (activeProject.emoji || '📁') + ' ' + activeProject.title
+    : ''
   const showProjectInMeta = isSystem && view !== 'inbox'
   const showAddForm = view !== 'soon' && view !== 'done'
-
   const openTasks = tasks.filter((t) => t.status !== 'done').sort(sortOpen)
   const doneTasks = tasks.filter((t) => t.status === 'done')
 
@@ -197,7 +257,6 @@ export default function Tasks() {
     const due = formatDue(task)
     const overdue = isOverdue(task)
     const sub = subCounts[task.id]
-
     const parts = []
     if (due) parts.push(due)
     if (showProjectInMeta) {
@@ -206,7 +265,6 @@ export default function Tasks() {
     }
     if (sub && sub.total > 0) parts.push('☑ ' + sub.done + '/' + sub.total)
     if (task.note) parts.push('📝')
-
     return (
       <li key={task.id} className={'task-item p' + task.priority + (isDone ? ' done' : '')}>
         <button
@@ -229,7 +287,6 @@ export default function Tasks() {
 
   function renderBody() {
     if (loading) return <p>Загрузка…</p>
-
     if (view === 'done') {
       return doneTasks.length === 0 ? (
         <p className="task-empty">{EMPTY_TEXT.done}</p>
@@ -237,7 +294,6 @@ export default function Tasks() {
         <ul className="task-list">{doneTasks.map(renderTask)}</ul>
       )
     }
-
     return (
       <>
         {openTasks.length === 0 && (
@@ -262,20 +318,25 @@ export default function Tasks() {
         onSelect={handleSelect}
         onCreate={handleCreateProject}
       />
-
       <div className="heading-row">
         <h1>{heading}</h1>
-        {activeProject && (
-          <button
-            type="button"
-            className="secondary-button edit-project"
-            onClick={() => setEditingProject(true)}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 'none' }}>
+          <span
+            style={{ fontSize: 13, color: online ? '#16a34a' : '#dc2626', whiteSpace: 'nowrap' }}
           >
-            ✏️ Изменить
-          </button>
-        )}
+            {online ? '🔄 Синхронизировано' : '⚠️ Нет связи'}
+          </span>
+          {activeProject && (
+            <button
+              type="button"
+              className="secondary-button edit-project"
+              onClick={() => setEditingProject(true)}
+            >
+              ✏️ Изменить
+            </button>
+          )}
+        </div>
       </div>
-
       {showAddForm && (
         <form className="task-form" onSubmit={handleAdd}>
           <input
@@ -290,11 +351,8 @@ export default function Tasks() {
           </button>
         </form>
       )}
-
       {error && <p className="task-error">{error}</p>}
-
       {renderBody()}
-
       {selected && (
         <TaskDetails
           key={selected.id}
@@ -306,7 +364,6 @@ export default function Tasks() {
           onSubtasksChange={handleSubtasksChange}
         />
       )}
-
       {editingProject && activeProject && (
         <ProjectEditor
           key={activeProject.id}
