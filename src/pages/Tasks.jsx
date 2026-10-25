@@ -31,6 +31,7 @@ export default function Tasks() {
     online,
     handleAdd,
     handleToggle,
+    handleToggleFavorite,
     handleSaveTask,
     handleDeleteTask,
     handleSubtasksChange,
@@ -110,6 +111,7 @@ export default function Tasks() {
           hideDone={hideDone}
           onToggleHide={() => setHideDone(!hideDone)}
           onToggle={handleToggle}
+          onToggleFavorite={handleToggleFavorite}
           onSelect={setSelected}
           sections={sections}
           collapsed={collapsed}

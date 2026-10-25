@@ -2,7 +2,7 @@ import { supabase } from './supabase.js'
 import { dayStartIso } from './dateUtils.js'
 
 // Задачи для выбранной папки или проекта.
-// view: 'inbox', 'today', 'tomorrow', 'soon', 'done' или идентификатор проекта
+// view: 'inbox', 'favorites', 'today', 'tomorrow', 'soon', 'done' или идентификатор проекта
 export async function fetchTasksForView(view) {
   let query = supabase
     .from('tasks')
@@ -12,6 +12,8 @@ export async function fetchTasksForView(view) {
 
   if (view === 'inbox') {
     query = query.is('project_id', null)
+  } else if (view === 'favorites') {
+    query = query.eq('status', 'open').eq('is_favorite', true)
   } else if (view === 'today') {
     // сегодняшние и просроченные
     query = query.eq('status', 'open').lt('due_at', dayStartIso(1))
@@ -64,7 +66,7 @@ export async function setTaskDone(id, done) {
   return data
 }
 
-// Изменение полей задачи (название, заметка, срок, приоритет, проект)
+// Изменение полей задачи (название, заметка, срок, приоритет, проект, избранное)
 export async function updateTask(id, fields) {
   const { data, error } = await supabase
     .from('tasks')

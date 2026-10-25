@@ -25,6 +25,7 @@ const HIDE_DONE_KEY = 'sb2_hide_done'
 // Остаётся ли задача в текущей папке после изменений
 function belongsToView(task, view) {
   if (view === 'inbox') return !task.project_id
+  if (view === 'favorites') return Boolean(task.is_favorite) && task.status !== 'done'
   if (view === 'done') return task.status === 'done'
   if (view === 'today' || view === 'tomorrow' || view === 'soon') {
     return dueInView(task.due_at, view)
@@ -200,6 +201,7 @@ export function useTasksScreen() {
       let extra = {}
       if (view === 'today') extra = dueAtDay(0)
       if (view === 'tomorrow') extra = dueAtDay(1)
+      if (view === 'favorites') extra = { is_favorite: true }
       const created = await addTask(text, projectId, extra)
       setTasks((prev) => [created, ...prev])
       setTitle('')
@@ -228,6 +230,25 @@ export function useTasksScreen() {
     } catch (err) {
       setTasks((prev) => prev.map((t) => (t.id === task.id ? task : t)))
       setError('Не удалось обновить задачу: ' + err.message)
+    }
+  }
+
+  // Звёздочка: добавить в избранное или убрать
+  async function handleToggleFavorite(task) {
+    const next = !task.is_favorite
+    setError('')
+    setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, is_favorite: next } : t)))
+    try {
+      const updated = await updateTask(task.id, { is_favorite: next })
+      if (view === 'favorites' && !next) {
+        // убрали из избранного: в этой папке ей больше не место
+        setTasks((prev) => prev.filter((t) => t.id !== task.id))
+      } else {
+        setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)))
+      }
+    } catch (err) {
+      setTasks((prev) => prev.map((t) => (t.id === task.id ? task : t)))
+      setError('Не удалось обновить избранное: ' + err.message)
     }
   }
 
@@ -308,6 +329,7 @@ export function useTasksScreen() {
     online,
     handleAdd,
     handleToggle,
+    handleToggleFavorite,
     handleSaveTask,
     handleDeleteTask,
     handleSubtasksChange,

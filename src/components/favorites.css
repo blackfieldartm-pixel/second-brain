@@ -1,0 +1,13 @@
+.task-star {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ring);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.task-star.on { color: var(--p2); }

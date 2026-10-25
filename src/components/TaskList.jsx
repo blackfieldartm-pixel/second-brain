@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { formatDue, isOverdue } from '../lib/dateUtils.js'
 import { isSystemView } from '../lib/views.js'
 import SectionBlock from './SectionBlock.jsx'
+import './favorites.css'
 
 // Сначала задачи с ближайшим сроком, потом без срока; при равенстве выше приоритет, потом новее
 function sortOpen(a, b) {
@@ -13,6 +14,7 @@ function sortOpen(a, b) {
 }
 
 const EMPTY_TEXT = {
+  favorites: 'Нет избранных задач. Нажми ☆ справа у любой задачи.',
   today: 'На сегодня задач нет.',
   tomorrow: 'На завтра задач нет.',
   soon: 'Нет задач со сроком позже завтрашнего дня.',
@@ -92,6 +94,7 @@ export default function TaskList({
   hideDone,
   onToggleHide,
   onToggle,
+  onToggleFavorite,
   onSelect,
   sections = [],
   collapsed = {},
@@ -140,6 +143,14 @@ export default function TaskList({
           {parts.length > 0 && (
             <span className={'task-meta' + (overdue ? ' overdue' : '')}>{parts.join(' · ')}</span>
           )}
+        </button>
+        <button
+          type="button"
+          className={'task-star' + (task.is_favorite ? ' on' : '')}
+          aria-label={task.is_favorite ? 'Убрать из избранного' : 'Добавить в избранное'}
+          onClick={() => onToggleFavorite(task)}
+        >
+          {task.is_favorite ? '★' : '☆'}
         </button>
       </li>
     )
