@@ -14,6 +14,8 @@ export default function Tasks() {
     view,
     selectView,
     tasks,
+    sections,
+    collapsed,
     subCounts,
     loading,
     error,
@@ -35,6 +37,11 @@ export default function Tasks() {
     handleCreateProject,
     handleSaveProject,
     handleDeleteProject,
+    handleAddSection,
+    handleRenameSection,
+    handleDeleteSection,
+    handleAddTaskToSection,
+    toggleSectionCollapsed,
   } = useTasksScreen()
 
   const systemView = SYSTEM_VIEWS.find((v) => v.id === view)
@@ -58,7 +65,11 @@ export default function Tasks() {
         <h1>{heading}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 'none' }}>
           <span
-            style={{ fontSize: 13, color: online ? '#16a34a' : '#dc2626', whiteSpace: 'nowrap' }}
+            style={{
+              fontSize: 13,
+              color: online ? 'var(--success)' : 'var(--danger)',
+              whiteSpace: 'nowrap',
+            }}
           >
             {online ? '🔄 Синхронизировано' : '⚠️ Нет связи'}
           </span>
@@ -100,6 +111,13 @@ export default function Tasks() {
           onToggleHide={() => setHideDone(!hideDone)}
           onToggle={handleToggle}
           onSelect={setSelected}
+          sections={sections}
+          collapsed={collapsed}
+          onToggleCollapse={toggleSectionCollapsed}
+          onAddSection={handleAddSection}
+          onRenameSection={handleRenameSection}
+          onDeleteSection={handleDeleteSection}
+          onAddTaskToSection={handleAddTaskToSection}
         />
       )}
       {selected && (
@@ -107,6 +125,7 @@ export default function Tasks() {
           key={selected.id}
           task={selected}
           projects={projects}
+          sections={sections}
           onSave={handleSaveTask}
           onDelete={handleDeleteTask}
           onClose={() => setSelected(null)}

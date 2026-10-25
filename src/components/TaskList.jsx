@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { formatDue, isOverdue } from '../lib/dateUtils.js'
 import { isSystemView } from '../lib/views.js'
+import SectionBlock from './SectionBlock.jsx'
 
 // Сначала задачи с ближайшим сроком, потом без срока; при равенстве выше приоритет, потом новее
 function sortOpen(a, b) {
@@ -18,6 +19,71 @@ const EMPTY_TEXT = {
   done: 'Пока нет выполненных задач.',
 }
 
+// Кнопка «+ Секция» с полем ввода названия
+function AddSection({ onAdd }) {
+  const [open, setOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  async function submit(e) {
+    e.preventDefault()
+    const text = name.trim()
+    if (!text) return
+    setBusy(true)
+    setError('')
+    try {
+      await onAdd(text)
+      setName('')
+      setOpen(false)
+    } catch (err) {
+      setError('Не удалось добавить секцию: ' + err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!open) {
+    return (
+      <div className="add-section-row">
+        <button type="button" className="link-button" onClick={() => setOpen(true)}>
+          + Секция
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <form className="add-section-form" onSubmit={submit}>
+        <input
+          className="task-input"
+          type="text"
+          placeholder="Название секции"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoFocus
+        />
+        <button className="task-add" type="submit" disabled={busy || !name.trim()}>
+          Добавить
+        </button>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={() => {
+            setOpen(false)
+            setName('')
+            setError('')
+          }}
+        >
+          Отмена
+        </button>
+      </form>
+      {error && <p className="task-error">{error}</p>}
+    </>
+  )
+}
+
 export default function TaskList({
   tasks,
   subCounts,
@@ -27,7 +93,15 @@ export default function TaskList({
   onToggleHide,
   onToggle,
   onSelect,
+  sections = [],
+  collapsed = {},
+  onToggleCollapse,
+  onAddSection,
+  onRenameSection,
+  onDeleteSection,
+  onAddTaskToSection,
 }) {
+  const isProjectView = !isSystemView(view)
   const showProjectInMeta = isSystemView(view) && view !== 'inbox'
   const openTasks = tasks.filter((t) => t.status !== 'done').sort(sortOpen)
   const doneTasks = tasks.filter((t) => t.status === 'done')
@@ -71,6 +145,21 @@ export default function TaskList({
     )
   }
 
+  function renderDone() {
+    if (doneTasks.length === 0) return null
+    return (
+      <>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 className="task-subtitle">Выполненные ({doneTasks.length})</h2>
+          <button type="button" className="link-button" onClick={onToggleHide}>
+            {hideDone ? 'показать' : 'скрыть'}
+          </button>
+        </div>
+        {!hideDone && <ul className="task-list">{doneTasks.map(renderTask)}</ul>}
+      </>
+    )
+  }
+
   if (view === 'done') {
     return doneTasks.length === 0 ? (
       <p className="task-empty">{EMPTY_TEXT.done}</p>
@@ -78,23 +167,43 @@ export default function TaskList({
       <ul className="task-list">{doneTasks.map(renderTask)}</ul>
     )
   }
+
+  // Проект: задачи без секции сверху, затем секции
+  if (isProjectView) {
+    const sectionIds = new Set(sections.map((s) => s.id))
+    const looseOpen = openTasks.filter((t) => !t.section_id || !sectionIds.has(t.section_id))
+    return (
+      <>
+        {openTasks.length === 0 && sections.length === 0 && (
+          <p className="task-empty">Пока нет задач. Добавь первую.</p>
+        )}
+        {looseOpen.length > 0 && <ul className="task-list">{looseOpen.map(renderTask)}</ul>}
+        {sections.map((s) => (
+          <SectionBlock
+            key={s.id}
+            section={s}
+            tasks={openTasks.filter((t) => t.section_id === s.id)}
+            collapsed={Boolean(collapsed[s.id])}
+            onToggleCollapse={onToggleCollapse}
+            onRename={onRenameSection}
+            onDelete={onDeleteSection}
+            onAddTask={onAddTaskToSection}
+            renderTask={renderTask}
+          />
+        ))}
+        <AddSection onAdd={onAddSection} />
+        {renderDone()}
+      </>
+    )
+  }
+
   return (
     <>
       {openTasks.length === 0 && (
         <p className="task-empty">{EMPTY_TEXT[view] || 'Пока нет задач. Добавь первую.'}</p>
       )}
       <ul className="task-list">{openTasks.map(renderTask)}</ul>
-      {doneTasks.length > 0 && (
-        <>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 className="task-subtitle">Выполненные ({doneTasks.length})</h2>
-            <button type="button" className="link-button" onClick={onToggleHide}>
-              {hideDone ? 'показать' : 'скрыть'}
-            </button>
-          </div>
-          {!hideDone && <ul className="task-list">{doneTasks.map(renderTask)}</ul>}
-        </>
-      )}
+      {renderDone()}
     </>
   )
 }

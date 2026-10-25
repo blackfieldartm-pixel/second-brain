@@ -1,0 +1,53 @@
+.section-block { margin-top: 20px; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.section-toggle {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-2);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.section-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 16px;
+  word-break: break-word;
+}
+
+.section-count { margin-left: 6px; font-weight: 400; font-size: 13px; color: var(--text-3); }
+
+.section-action {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-2);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.section-rename { display: flex; gap: 8px; flex: 1; min-width: 0; }
+.section-rename .task-input { padding: 10px; }
+.section-rename .task-add { padding: 0 14px; }
+
+.section-add-form { display: flex; gap: 8px; margin: 0 0 8px; }
+
+.section-empty { margin: 0 0 8px 8px; font-size: 14px; }
+
+.add-section-row { margin-top: 16px; }
+.add-section-form { display: flex; gap: 8px; margin-top: 16px; }

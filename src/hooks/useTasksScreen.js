@@ -8,6 +8,7 @@ import {
   deleteTask,
 } from '../lib/tasksApi.js'
 import { fetchProjects, addProject, updateProject, deleteProject } from '../lib/projectsApi.js'
+import { fetchSections, addSection, renameSection, deleteSection } from '../lib/sectionsApi.js'
 import { dueAtDay, dueInView } from '../lib/dateUtils.js'
 import { isSystemView } from '../lib/views.js'
 import { useAutoRefresh } from '../lib/useSync.js'
@@ -16,6 +17,8 @@ import { readJSON, writeJSON, readText, writeText } from '../lib/localCache.js'
 // Ключи локального кэша и настроек экрана
 const CACHE_TASKS = 'sb2_tasks_'
 const CACHE_PROJECTS = 'sb2_projects'
+const CACHE_SECTIONS = 'sb2_sections_'
+const COLLAPSED_KEY = 'sb2_collapsed_sections'
 const LAST_VIEW_KEY = 'sb2_last_view'
 const HIDE_DONE_KEY = 'sb2_hide_done'
 
@@ -35,6 +38,8 @@ export function useTasksScreen() {
   const [projectsLoaded, setProjectsLoaded] = useState(false)
   const [view, setView] = useState(() => readText(LAST_VIEW_KEY, 'inbox'))
   const [tasks, setTasks] = useState([])
+  const [sections, setSections] = useState([])
+  const [collapsed, setCollapsed] = useState(() => readJSON(COLLAPSED_KEY) || {})
   const [subCounts, setSubCounts] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -113,6 +118,26 @@ export function useTasksScreen() {
     }
   }, [view])
 
+  // Секции проекта: сначала из кэша, затем свежие из базы (в системных папках секций нет)
+  useEffect(() => {
+    if (isSystemView(view)) {
+      setSections([])
+      return undefined
+    }
+    let cancelled = false
+    setSections(readJSON(CACHE_SECTIONS + view) || [])
+    fetchSections(view)
+      .then((data) => {
+        if (cancelled) return
+        setSections(data)
+        writeJSON(CACHE_SECTIONS + view, data)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [view])
+
   // Тихое обновление по событиям: realtime, возврат в приложение, появление сети
   useEffect(() => {
     if (refreshKey === 0) return
@@ -123,6 +148,14 @@ export function useTasksScreen() {
         writeJSON(CACHE_PROJECTS, data)
       })
       .catch(() => {})
+    if (!isSystemView(viewId)) {
+      fetchSections(viewId)
+        .then((data) => {
+          setSections(data)
+          writeJSON(CACHE_SECTIONS + viewId, data)
+        })
+        .catch(() => {})
+    }
     fetchTasksForView(viewId)
       .then(async (data) => {
         const counts = await fetchSubtaskCounts(data.map((t) => t.id)).catch(() => ({}))
@@ -218,11 +251,48 @@ export function useTasksScreen() {
     setSubCounts((prev) => ({ ...prev, [parentId]: counts }))
   }
 
+  // Секции: ошибки пробрасываем наверх, их показывает сам блок секции
+  async function handleAddSection(sectionTitle) {
+    const maxOrder = sections.reduce((m, s) => Math.max(m, s.sort_order || 0), 0)
+    const created = await addSection(view, sectionTitle, maxOrder + 1)
+    const next = [...sections, created]
+    setSections(next)
+    writeJSON(CACHE_SECTIONS + view, next)
+  }
+
+  async function handleRenameSection(id, sectionTitle) {
+    const updated = await renameSection(id, sectionTitle)
+    const next = sections.map((s) => (s.id === id ? updated : s))
+    setSections(next)
+    writeJSON(CACHE_SECTIONS + view, next)
+  }
+
+  async function handleDeleteSection(id) {
+    await deleteSection(id)
+    const next = sections.filter((s) => s.id !== id)
+    setSections(next)
+    writeJSON(CACHE_SECTIONS + view, next)
+    setTasks((prev) => prev.map((t) => (t.section_id === id ? { ...t, section_id: null } : t)))
+  }
+
+  async function handleAddTaskToSection(sectionId, text) {
+    const created = await addTask(text, projectId, { section_id: sectionId })
+    setTasks((prev) => [created, ...prev])
+  }
+
+  function toggleSectionCollapsed(id) {
+    const next = { ...collapsed, [id]: !collapsed[id] }
+    setCollapsed(next)
+    writeJSON(COLLAPSED_KEY, next)
+  }
+
   return {
     projects,
     view,
     selectView,
     tasks,
+    sections,
+    collapsed,
     subCounts,
     loading,
     error,
@@ -244,5 +314,10 @@ export function useTasksScreen() {
     handleCreateProject,
     handleSaveProject,
     handleDeleteProject,
+    handleAddSection,
+    handleRenameSection,
+    handleDeleteSection,
+    handleAddTaskToSection,
+    toggleSectionCollapsed,
   }
 }
