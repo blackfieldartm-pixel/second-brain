@@ -17,9 +17,11 @@ import TaskDetails from '../components/TaskDetails.jsx'
 import './tasks.css'
 import '../components/projecteditor.css'
 
-// Ключи локального кэша: последние данные для мгновенного открытия
+// Ключи локального кэша и настроек экрана
 const CACHE_TASKS = 'sb2_tasks_'
 const CACHE_PROJECTS = 'sb2_projects'
+const LAST_VIEW_KEY = 'sb2_last_view'
+const HIDE_DONE_KEY = 'sb2_hide_done'
 
 function readCache(key) {
   try {
@@ -35,6 +37,22 @@ function writeCache(key, value) {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {
     // память недоступна или переполнена — просто работаем без кэша
+  }
+}
+
+function readLastView() {
+  try {
+    return localStorage.getItem(LAST_VIEW_KEY) || 'inbox'
+  } catch {
+    return 'inbox'
+  }
+}
+
+function readHideDone() {
+  try {
+    return localStorage.getItem(HIDE_DONE_KEY) === '1'
+  } catch {
+    return false
   }
 }
 
@@ -66,7 +84,8 @@ const EMPTY_TEXT = {
 
 export default function Tasks() {
   const [projects, setProjects] = useState([])
-  const [view, setView] = useState('inbox')
+  const [projectsLoaded, setProjectsLoaded] = useState(false)
+  const [view, setView] = useState(readLastView)
   const [tasks, setTasks] = useState([])
   const [subCounts, setSubCounts] = useState({})
   const [loading, setLoading] = useState(true)
@@ -75,6 +94,7 @@ export default function Tasks() {
   const [adding, setAdding] = useState(false)
   const [selected, setSelected] = useState(null)
   const [editingProject, setEditingProject] = useState(false)
+  const [hideDone, setHideDone] = useState(readHideDone)
   const [refreshKey, setRefreshKey] = useState(0)
   const viewRef = useRef(view)
   viewRef.current = view
@@ -91,12 +111,37 @@ export default function Tasks() {
     fetchProjects()
       .then((data) => {
         setProjects(data)
+        setProjectsLoaded(true)
         writeCache(CACHE_PROJECTS, data)
       })
       .catch((e) => {
         if (!cached) setError('Не удалось загрузить проекты: ' + e.message)
       })
   }, [])
+
+  // Запоминаем последнюю папку и настройку скрытия выполненных
+  useEffect(() => {
+    try {
+      localStorage.setItem(LAST_VIEW_KEY, view)
+    } catch {
+      // память недоступна — просто не запоминаем
+    }
+  }, [view])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(HIDE_DONE_KEY, hideDone ? '1' : '0')
+    } catch {
+      // память недоступна — просто не запоминаем
+    }
+  }, [hideDone])
+
+  // Если сохранённый проект удалён — возвращаемся во «Входящие»
+  useEffect(() => {
+    if (projectsLoaded && !isSystemView(view) && !projects.some((p) => p.id === view)) {
+      setView('inbox')
+    }
+  }, [projectsLoaded, projects, view])
 
   // Задачи папки: сначала из кэша, затем свежие из базы
   useEffect(() => {
@@ -302,8 +347,17 @@ export default function Tasks() {
         <ul className="task-list">{openTasks.map(renderTask)}</ul>
         {doneTasks.length > 0 && (
           <>
-            <h2 className="task-subtitle">Выполненные ({doneTasks.length})</h2>
-            <ul className="task-list">{doneTasks.map(renderTask)}</ul>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 className="task-subtitle">Выполненные ({doneTasks.length})</h2>
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => setHideDone(!hideDone)}
+              >
+                {hideDone ? 'показать' : 'скрыть'}
+              </button>
+            </div>
+            {!hideDone && <ul className="task-list">{doneTasks.map(renderTask)}</ul>}
           </>
         )}
       </>

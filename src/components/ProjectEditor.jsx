@@ -1,9 +1,6 @@
 import React, { useState } from 'react'
+import { EMOJIS, COLORS } from '../lib/palettes.js'
 import './taskdetails.css'
-
-// Те же наборы, что в ProjectBar.jsx
-const EMOJIS = ['📁', '', '🏠', '👤', '', '📚', '💡', '🛒', '✈️', '❤️']
-const COLORS = ['#2563eb', '#16a34a', '#dc2626', '#d97706', '#9333ea', '#0891b2']
 
 export default function ProjectEditor({ project, onSave, onDelete, onClose }) {
   const [name, setName] = useState(project.title)

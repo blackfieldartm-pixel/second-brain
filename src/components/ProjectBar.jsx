@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
 import { SYSTEM_VIEWS } from '../lib/views.js'
-
-const EMOJIS = ['📁', '💼', '🏠', '👤', '🎯', '📚', '💡', '🛒', '✈️', '❤️']
-const COLORS = ['#2563eb', '#16a34a', '#dc2626', '#d97706', '#9333ea', '#0891b2']
+import { EMOJIS, COLORS } from '../lib/palettes.js'
 
 function chipStyle(accent, active) {
   return active
@@ -57,7 +55,6 @@ export default function ProjectBar({ projects, activeId, onSelect, onCreate }) {
           </button>
         ))}
       </div>
-
       <div className="project-bar">
         {projects.map((p) => (
           <button
@@ -70,12 +67,10 @@ export default function ProjectBar({ projects, activeId, onSelect, onCreate }) {
             {(p.emoji || '📁') + ' ' + p.title}
           </button>
         ))}
-
         <button type="button" className="chip chip-add" onClick={() => setShowForm(true)}>
           + Проект
         </button>
       </div>
-
       {showForm && (
         <form className="project-form" onSubmit={submit}>
           <input
@@ -86,7 +81,6 @@ export default function ProjectBar({ projects, activeId, onSelect, onCreate }) {
             onChange={(e) => setName(e.target.value)}
             autoFocus
           />
-
           <div className="picker">
             {EMOJIS.map((e) => (
               <button
@@ -99,7 +93,6 @@ export default function ProjectBar({ projects, activeId, onSelect, onCreate }) {
               </button>
             ))}
           </div>
-
           <div className="picker">
             {COLORS.map((c) => (
               <button
@@ -112,7 +105,6 @@ export default function ProjectBar({ projects, activeId, onSelect, onCreate }) {
               />
             ))}
           </div>
-
           <div className="form-actions">
             <button className="task-add" type="submit" disabled={busy || !name.trim()}>
               {busy ? 'Создаю…' : 'Создать'}
@@ -121,7 +113,6 @@ export default function ProjectBar({ projects, activeId, onSelect, onCreate }) {
               Отмена
             </button>
           </div>
-
           {error && <p className="task-error">{error}</p>}
         </form>
       )}
