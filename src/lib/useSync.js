@@ -54,6 +54,7 @@ export function useAutoRefresh(onRefresh) {
       .channel('second-brain-sync')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, schedule)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, schedule)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sections' }, schedule)
       .subscribe()
     return () => {
       if (timer) clearTimeout(timer)

@@ -13,6 +13,7 @@ const PRIORITIES = [
 export default function TaskDetails({
   task,
   projects,
+  sections = [],
   onSave,
   onDelete,
   onClose,
@@ -24,8 +25,15 @@ export default function TaskDetails({
   const [time, setTime] = useState(toTimeInput(task.due_at, task.all_day))
   const [priority, setPriority] = useState(task.priority)
   const [projectId, setProjectId] = useState(task.project_id || '')
+  const [sectionId, setSectionId] = useState(
+    sections.some((s) => s.id === task.section_id) ? task.section_id : ''
+  )
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+
+  // Секции показываем, только пока задача остаётся в своём проекте
+  const sameProject = projectId === (task.project_id || '')
+  const showSections = sameProject && sections.length > 0
 
   function changeDate(value) {
     setDate(value)
@@ -38,14 +46,19 @@ export default function TaskDetails({
     if (!text) return
     setBusy(true)
     setError('')
+
+    const fields = {
+      title: text,
+      note: note.trim() || null,
+      priority,
+      project_id: projectId || null,
+      ...buildDue(date, time),
+    }
+    if (!sameProject) fields.section_id = null
+    else if (showSections) fields.section_id = sectionId || null
+
     try {
-      await onSave({
-        title: text,
-        note: note.trim() || null,
-        priority,
-        project_id: projectId || null,
-        ...buildDue(date, time),
-      })
+      await onSave(fields)
     } catch (err) {
       setError('Не удалось сохранить: ' + err.message)
       setBusy(false)
@@ -131,6 +144,23 @@ export default function TaskDetails({
             </option>
           ))}
         </select>
+        {showSections && (
+          <>
+            <label className="field-label">Секция</label>
+            <select
+              className="field"
+              value={sectionId}
+              onChange={(e) => setSectionId(e.target.value)}
+            >
+              <option value="">Без секции</option>
+              {sections.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
         {error && <p className="task-error">{error}</p>}
         <div className="form-actions modal-actions">
           <button className="task-add" type="submit" disabled={busy || !title.trim()}>
