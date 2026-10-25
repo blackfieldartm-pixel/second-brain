@@ -38,3 +38,24 @@ export async function setTaskDone(id, done) {
   if (error) throw error
   return data
 }
+
+// Изменение полей задачи (название, заметка, срок, приоритет, проект)
+export async function updateTask(id, fields) {
+  const { data, error } = await supabase
+    .from('tasks')
+    .update(fields)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// Мягкое удаление: задача остаётся в базе, но нигде не показывается
+export async function deleteTask(id) {
+  const { error } = await supabase
+    .from('tasks')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw error
+}

@@ -1,0 +1,100 @@
+/* Карточка задачи */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 92%;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .modal-overlay { align-items: center; }
+  .modal { border-radius: 16px; max-height: 90vh; }
+}
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; }
+.modal-header h2 { margin: 0; font-size: 20px; }
+
+.field-label { display: block; font-size: 13px; color: #666; margin: 14px 0 6px; }
+
+.field {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px;
+  font-size: 16px;
+  font-family: inherit;
+  border-radius: 10px;
+  border: 1px solid #bbb;
+  background: #fff;
+}
+
+.due-row { display: flex; gap: 8px; }
+.due-row .field { flex: 1; min-width: 0; width: auto; }
+
+.priority-row { display: flex; gap: 8px; }
+
+.prio {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 14px;
+  border: 2px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+.prio.selected { color: #fff; }
+.prio.p0.selected { background: #6b7280; border-color: #6b7280; }
+.prio.p1.selected { background: #2563eb; border-color: #2563eb; }
+.prio.p2.selected { background: #d97706; border-color: #d97706; }
+.prio.p3.selected { background: #dc2626; border-color: #dc2626; }
+
+.modal-actions { margin-top: 16px; }
+
+.danger-button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  background: #fff;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+/* Пометки в списке задач */
+.task-body {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.task-body .task-title { display: block; }
+
+.task-meta { display: block; margin-top: 2px; font-size: 13px; color: #666; }
+.task-meta.overdue { color: #dc2626; }
+
+.task-item.p1:not(.done) .task-check { border-color: #2563eb; }
+.task-item.p2:not(.done) .task-check { border-color: #d97706; }
+.task-item.p3:not(.done) .task-check { border-color: #dc2626; }
