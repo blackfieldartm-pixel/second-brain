@@ -19,12 +19,6 @@ body {
   font-size: 14px;
   cursor: pointer;
 }
-/* Тонкая строка с выходом, только на телефоне */
-.topbar-mobile {
-  display: flex;
-  justify-content: flex-end;
-  margin: 0 0 8px;
-}
 /* Меню: внизу на телефоне, слева на компьютере */
 .nav {
   position: fixed;
@@ -32,12 +26,10 @@ body {
   right: 0;
   bottom: 0;
   display: flex;
-  flex-direction: column-reverse;
   background: #fff;
   border-top: 1px solid #ddd;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-.nav-tabs { display: flex; }
 .nav-item {
   flex: 1;
   display: flex;
@@ -47,24 +39,14 @@ body {
   padding: 8px 0;
   background: none;
   border: none;
-  font-size: 12px;
+  font-size: 11px;
   color: #666;
   cursor: pointer;
 }
-.nav-item .icon { font-size: 22px; }
+.nav-item .icon { font-size: 20px; }
 .nav-item.active { color: #2563eb; font-weight: 600; }
-/* Строка с почтой и выходом: только на компьютере */
-.nav-footer { display: none; }
-.nav-email {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.nav-exit { flex: none; padding: 6px 4px; }
 @media (min-width: 768px) {
   .app { flex-direction: row; }
-  .topbar-mobile { display: none; }
   .nav {
     position: static;
     flex-direction: column;
@@ -74,7 +56,6 @@ body {
     border-right: 1px solid #ddd;
     padding: 16px 8px;
   }
-  .nav-tabs { flex-direction: column; }
   .nav-item {
     flex: none;
     flex-direction: row;
@@ -85,16 +66,5 @@ body {
     border-radius: 10px;
   }
   .nav-item.active { background: #eef2ff; }
-  .nav-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-top: auto;
-    border-top: 1px solid #eee;
-    padding: 12px;
-    font-size: 12px;
-    color: #777;
-  }
   .content { padding: 32px; padding-bottom: 32px; }
 }
