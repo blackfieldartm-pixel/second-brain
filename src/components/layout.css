@@ -10,7 +10,7 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
-  padding-bottom: 130px;
+  padding-bottom: 90px;
 }
 .link-button {
   background: none;
@@ -18,6 +18,12 @@ body {
   color: #2563eb;
   font-size: 14px;
   cursor: pointer;
+}
+/* Тонкая строка с выходом, только на телефоне */
+.topbar-mobile {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 8px;
 }
 /* Меню: внизу на телефоне, слева на компьютере */
 .nav {
@@ -47,17 +53,8 @@ body {
 }
 .nav-item .icon { font-size: 22px; }
 .nav-item.active { color: #2563eb; font-weight: 600; }
-/* Нижняя строка: почта слева и выход справа */
-.nav-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-bottom: 1px solid #eee;
-  font-size: 12px;
-  color: #777;
-}
+/* Строка с почтой и выходом: только на компьютере */
+.nav-footer { display: none; }
 .nav-email {
   min-width: 0;
   overflow: hidden;
@@ -67,6 +64,7 @@ body {
 .nav-exit { flex: none; padding: 6px 4px; }
 @media (min-width: 768px) {
   .app { flex-direction: row; }
+  .topbar-mobile { display: none; }
   .nav {
     position: static;
     flex-direction: column;
@@ -88,10 +86,15 @@ body {
   }
   .nav-item.active { background: #eef2ff; }
   .nav-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
     margin-top: auto;
-    border-bottom: none;
     border-top: 1px solid #eee;
     padding: 12px;
+    font-size: 12px;
+    color: #777;
   }
   .content { padding: 32px; padding-bottom: 32px; }
 }

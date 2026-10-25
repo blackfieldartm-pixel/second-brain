@@ -38,6 +38,11 @@ export default function Layout({ email, onSignOut }) {
         </div>
       </nav>
       <main className="content">
+        <div className="topbar-mobile">
+          <button type="button" className="link-button" onClick={onSignOut}>
+            Выйти
+          </button>
+        </div>
         {active === 'tasks' ? (
           <Tasks />
         ) : (

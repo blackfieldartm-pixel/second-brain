@@ -6,7 +6,6 @@ import Layout from './components/Layout.jsx'
 function App() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     if (!isSupabaseConfigured) {
       setLoading(false)
@@ -21,27 +20,25 @@ function App() {
     })
     return () => data.subscription.unsubscribe()
   }, [])
-
   const box = { padding: '20px', fontFamily: 'sans-serif', textAlign: 'center', marginTop: '50px' }
-
   if (!isSupabaseConfigured) {
     return <div style={box}>Ключи Supabase не найдены. Проверь переменные в Vercel.</div>
   }
-
   if (loading) {
     return <div style={box}>Загрузка…</div>
   }
-
   if (!session) {
     return <Login />
   }
-
   return (
     <Layout
       email={session.user.email}
-      onSignOut={() => supabase.auth.signOut()}
+      onSignOut={() => {
+        if (window.confirm('Выйти из приложения?')) {
+          supabase.auth.signOut()
+        }
+      }}
     />
   )
 }
-
 export default App
