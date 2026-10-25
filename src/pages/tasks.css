@@ -1,5 +1,4 @@
-.tasks { max-width: 640px; }
-
+.tasks { max-width: 640px; margin: 0 auto; }
 /* Полоса проектов */
 .project-bar {
   display: flex;
@@ -8,7 +7,6 @@
   padding-bottom: 6px;
   margin-bottom: 8px;
 }
-
 .chip {
   flex: none;
   padding: 8px 14px;
@@ -21,7 +19,6 @@
   white-space: nowrap;
 }
 .chip-add { border: 2px dashed #9ca3af; color: #555; }
-
 /* Форма создания проекта */
 .project-form {
   background: #fff;
@@ -29,9 +26,7 @@
   padding: 12px;
   margin: 8px 0 16px;
 }
-
 .picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-
 .pick {
   width: 40px;
   height: 40px;
@@ -42,7 +37,6 @@
   cursor: pointer;
 }
 .pick.selected { border-color: #2563eb; background: #eef2ff; }
-
 .color-pick {
   width: 32px;
   height: 32px;
@@ -52,10 +46,8 @@
   cursor: pointer;
 }
 .color-pick.selected { box-shadow: 0 0 0 3px #111; }
-
 .form-actions { display: flex; gap: 8px; }
 .form-actions .task-add { padding: 12px 18px; }
-
 .secondary-button {
   padding: 12px 18px;
   font-size: 16px;
@@ -64,10 +56,8 @@
   background: #fff;
   cursor: pointer;
 }
-
 /* Задачи */
 .task-form { display: flex; gap: 8px; margin: 12px 0 16px; }
-
 .task-input {
   flex: 1;
   min-width: 0;
@@ -77,7 +67,6 @@
   border: 1px solid #bbb;
   background: #fff;
 }
-
 .task-add {
   padding: 0 18px;
   font-size: 16px;
@@ -88,9 +77,7 @@
   cursor: pointer;
 }
 .task-add:disabled { opacity: 0.5; }
-
 .task-list { list-style: none; margin: 0; padding: 0; }
-
 .task-item {
   display: flex;
   align-items: center;
@@ -100,7 +87,6 @@
   border-radius: 10px;
   margin-bottom: 8px;
 }
-
 .task-check {
   flex: none;
   width: 32px;
@@ -115,10 +101,8 @@
   cursor: pointer;
 }
 .task-item.done .task-check { background: #2563eb; border-color: #2563eb; }
-
 .task-title { flex: 1; word-break: break-word; }
 .task-item.done .task-title { color: #888; text-decoration: line-through; }
-
 .task-subtitle { font-size: 16px; color: #555; margin: 24px 0 8px; }
 .task-empty { color: #777; }
 .task-error { color: #c00; }

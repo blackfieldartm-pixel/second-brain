@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import './taskdetails.css'
 
 // Те же наборы, что в ProjectBar.jsx
-const EMOJIS = ['📁', '💼', '🏠', '👤', '🎯', '📚', '💡', '🛒', '✈️', '❤️']
+const EMOJIS = ['📁', '', '🏠', '👤', '', '📚', '💡', '🛒', '✈️', '❤️']
 const COLORS = ['#2563eb', '#16a34a', '#dc2626', '#d97706', '#9333ea', '#0891b2']
 
 export default function ProjectEditor({ project, onSave, onDelete, onClose }) {
@@ -50,7 +50,6 @@ export default function ProjectEditor({ project, onSave, onDelete, onClose }) {
             Закрыть
           </button>
         </div>
-
         <label className="field-label">Название</label>
         <input
           className="field"
@@ -58,7 +57,6 @@ export default function ProjectEditor({ project, onSave, onDelete, onClose }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-
         <label className="field-label">Эмодзи</label>
         <div className="picker">
           {EMOJIS.map((e) => (
@@ -72,7 +70,6 @@ export default function ProjectEditor({ project, onSave, onDelete, onClose }) {
             </button>
           ))}
         </div>
-
         <label className="field-label">Цвет</label>
         <div className="picker">
           {COLORS.map((c) => (
@@ -86,9 +83,7 @@ export default function ProjectEditor({ project, onSave, onDelete, onClose }) {
             />
           ))}
         </div>
-
         {error && <p className="task-error">{error}</p>}
-
         <div className="form-actions modal-actions">
           <button className="task-add" type="submit" disabled={busy || !name.trim()}>
             {busy ? 'Подожди…' : 'Сохранить'}
@@ -96,11 +91,17 @@ export default function ProjectEditor({ project, onSave, onDelete, onClose }) {
           <button className="secondary-button" type="button" onClick={onClose}>
             Отмена
           </button>
+          <button
+            type="button"
+            className="danger-button"
+            aria-label="Удалить проект"
+            title="Удалить проект"
+            onClick={handleDelete}
+            disabled={busy}
+          >
+            🗑️
+          </button>
         </div>
-
-        <button type="button" className="danger-button" onClick={handleDelete} disabled={busy}>
-          Удалить проект
-        </button>
       </form>
     </div>
   )

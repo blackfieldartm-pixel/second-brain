@@ -73,7 +73,6 @@ export default function TaskDetails({
             Закрыть
           </button>
         </div>
-
         <label className="field-label">Название</label>
         <input
           className="field"
@@ -81,7 +80,6 @@ export default function TaskDetails({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-
         <label className="field-label">Заметка</label>
         <textarea
           className="field"
@@ -89,9 +87,7 @@ export default function TaskDetails({
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
-
         <Subtasks parent={task} onCountChange={onSubtasksChange} />
-
         <label className="field-label">Срок (дата и время, время можно не указывать)</label>
         <div className="due-row">
           <input
@@ -113,7 +109,6 @@ export default function TaskDetails({
             Убрать срок
           </button>
         )}
-
         <label className="field-label">Приоритет</label>
         <div className="priority-row">
           {PRIORITIES.map((p) => (
@@ -127,7 +122,6 @@ export default function TaskDetails({
             </button>
           ))}
         </div>
-
         <label className="field-label">Проект</label>
         <select className="field" value={projectId} onChange={(e) => setProjectId(e.target.value)}>
           <option value="">📥 Входящие</option>
@@ -137,9 +131,7 @@ export default function TaskDetails({
             </option>
           ))}
         </select>
-
         {error && <p className="task-error">{error}</p>}
-
         <div className="form-actions modal-actions">
           <button className="task-add" type="submit" disabled={busy || !title.trim()}>
             {busy ? 'Подожди…' : 'Сохранить'}
@@ -147,11 +139,17 @@ export default function TaskDetails({
           <button className="secondary-button" type="button" onClick={onClose}>
             Отмена
           </button>
+          <button
+            type="button"
+            className="danger-button"
+            aria-label="Удалить задачу"
+            title="Удалить задачу"
+            onClick={handleDelete}
+            disabled={busy}
+          >
+            🗑️
+          </button>
         </div>
-
-        <button type="button" className="danger-button" onClick={handleDelete} disabled={busy}>
-          Удалить задачу
-        </button>
       </form>
     </div>
   )
