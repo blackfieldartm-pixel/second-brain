@@ -13,27 +13,31 @@ const TABS = [
 export default function Layout({ email, onSignOut }) {
   const [active, setActive] = useState('tasks')
   const tab = TABS.find((t) => t.id === active)
-
   return (
     <div className="app">
       <nav className="nav">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={'nav-item' + (t.id === active ? ' active' : '')}
-            onClick={() => setActive(t.id)}
-          >
-            <span className="icon">{t.icon}</span>
-            <span>{t.label}</span>
-          </button>
-        ))}
-      </nav>
-
-      <main className="content">
-        <div className="topbar">
-          <span>{email}</span>
-          <button className="link-button" onClick={onSignOut}>Выйти</button>
+        <div className="nav-tabs">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              className={'nav-item' + (t.id === active ? ' active' : '')}
+              onClick={() => setActive(t.id)}
+            >
+              <span className="icon">{t.icon}</span>
+              <span>{t.label}</span>
+            </button>
+          ))}
         </div>
+        <div className="nav-footer">
+          <span className="nav-email" title={email}>
+            {email}
+          </span>
+          <button type="button" className="link-button nav-exit" onClick={onSignOut}>
+            Выйти
+          </button>
+        </div>
+      </nav>
+      <main className="content">
         {active === 'tasks' ? (
           <Tasks />
         ) : (
