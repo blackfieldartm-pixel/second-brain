@@ -13,17 +13,17 @@
   height: 30px;
   padding: 0;
   border-radius: 50%;
-  border: 2px solid #9ca3af;
+  border: 2px solid var(--ring);
   background: none;
   color: #fff;
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
 }
-.subtask-item.done .subtask-check { background: #2563eb; border-color: #2563eb; }
+.subtask-item.done .subtask-check { background: var(--accent); border-color: var(--accent); }
 
 .subtask-title { flex: 1; min-width: 0; word-break: break-word; }
-.subtask-item.done .subtask-title { color: #888; text-decoration: line-through; }
+.subtask-item.done .subtask-title { color: var(--text-3); text-decoration: line-through; }
 
 .subtask-remove {
   flex: none;
@@ -32,7 +32,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: #9ca3af;
+  color: var(--ring);
   font-size: 22px;
   cursor: pointer;
 }

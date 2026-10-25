@@ -5,7 +5,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--overlay);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -16,7 +16,8 @@
   max-width: 520px;
   max-height: 92%;
   overflow-y: auto;
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
   border-radius: 16px 16px 0 0;
   padding: 16px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
@@ -27,7 +28,7 @@
 }
 .modal-header { display: flex; justify-content: space-between; align-items: center; }
 .modal-header h2 { margin: 0; font-size: 20px; }
-.field-label { display: block; font-size: 13px; color: #666; margin: 14px 0 6px; }
+.field-label { display: block; font-size: 13px; color: var(--text-2); margin: 14px 0 6px; }
 .field {
   width: 100%;
   min-height: 48px;
@@ -35,8 +36,9 @@
   font-size: 16px;
   font-family: inherit;
   border-radius: 10px;
-  border: 1px solid #bbb;
-  background: #fff;
+  border: 1px solid var(--line-strong);
+  background: var(--field);
+  color: var(--text);
 }
 .due-row { display: flex; gap: 8px; }
 .due-row .field { flex: 1; min-width: 0; width: auto; }
@@ -45,25 +47,26 @@
   flex: 1;
   padding: 10px 0;
   font-size: 14px;
-  border: 2px solid #d1d5db;
+  border: 2px solid var(--line-strong);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
   cursor: pointer;
 }
 .prio.selected { color: #fff; }
 .prio.p0.selected { background: #6b7280; border-color: #6b7280; }
-.prio.p1.selected { background: #2563eb; border-color: #2563eb; }
-.prio.p2.selected { background: #d97706; border-color: #d97706; }
-.prio.p3.selected { background: #dc2626; border-color: #dc2626; }
+.prio.p1.selected { background: var(--p1); border-color: var(--p1); }
+.prio.p2.selected { background: var(--p2); border-color: var(--p2); }
+.prio.p3.selected { background: var(--p3); border-color: var(--p3); }
 .modal-actions { margin-top: 16px; align-items: center; }
 .danger-button {
   margin: 0 0 0 auto;
   padding: 12px 14px;
   font-size: 18px;
   line-height: 1;
-  border: 1px solid #fca5a5;
+  border: 1px solid var(--danger-line);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface);
   cursor: pointer;
 }
 /* Пометки в списке задач */
@@ -79,8 +82,8 @@
   cursor: pointer;
 }
 .task-body .task-title { display: block; }
-.task-meta { display: block; margin-top: 2px; font-size: 13px; color: #666; }
-.task-meta.overdue { color: #dc2626; }
-.task-item.p1:not(.done) .task-check { border-color: #2563eb; }
-.task-item.p2:not(.done) .task-check { border-color: #d97706; }
-.task-item.p3:not(.done) .task-check { border-color: #dc2626; }
+.task-meta { display: block; margin-top: 2px; font-size: 13px; color: var(--text-2); }
+.task-meta.overdue { color: var(--danger); }
+.task-item.p1:not(.done) .task-check { border-color: var(--p1); }
+.task-item.p2:not(.done) .task-check { border-color: var(--p2); }
+.task-item.p3:not(.done) .task-check { border-color: var(--p3); }

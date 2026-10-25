@@ -11,17 +11,17 @@
   flex: none;
   padding: 8px 14px;
   font-size: 15px;
-  border: 2px solid #2563eb;
+  border: 2px solid var(--accent);
   border-radius: 999px;
-  background: #fff;
-  color: #111;
+  background: var(--surface);
+  color: var(--text);
   cursor: pointer;
   white-space: nowrap;
 }
-.chip-add { border: 2px dashed #9ca3af; color: #555; }
+.chip-add { border: 2px dashed var(--ring); color: var(--text-2); }
 /* Форма создания проекта */
 .project-form {
-  background: #fff;
+  background: var(--surface);
   border-radius: 10px;
   padding: 12px;
   margin: 8px 0 16px;
@@ -33,27 +33,28 @@
   font-size: 22px;
   border: 2px solid transparent;
   border-radius: 10px;
-  background: #f3f4f6;
+  background: var(--surface-alt);
   cursor: pointer;
 }
-.pick.selected { border-color: #2563eb; background: #eef2ff; }
+.pick.selected { border-color: var(--accent); background: var(--accent-soft); }
 .color-pick {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 3px solid #fff;
-  box-shadow: 0 0 0 1px #bbb;
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--line-strong);
   cursor: pointer;
 }
-.color-pick.selected { box-shadow: 0 0 0 3px #111; }
+.color-pick.selected { box-shadow: 0 0 0 3px var(--text); }
 .form-actions { display: flex; gap: 8px; }
 .form-actions .task-add { padding: 12px 18px; }
 .secondary-button {
   padding: 12px 18px;
   font-size: 16px;
-  border: 1px solid #bbb;
+  border: 1px solid var(--line-strong);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
   cursor: pointer;
 }
 /* Задачи */
@@ -64,15 +65,16 @@
   padding: 14px;
   font-size: 16px;
   border-radius: 10px;
-  border: 1px solid #bbb;
-  background: #fff;
+  border: 1px solid var(--line-strong);
+  background: var(--field);
+  color: var(--text);
 }
 .task-add {
   padding: 0 18px;
   font-size: 16px;
   border: none;
   border-radius: 10px;
-  background: #2563eb;
+  background: var(--accent);
   color: #fff;
   cursor: pointer;
 }
@@ -83,7 +85,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 10px;
   margin-bottom: 8px;
 }
@@ -93,16 +95,16 @@
   height: 32px;
   padding: 0;
   border-radius: 50%;
-  border: 2px solid #9ca3af;
+  border: 2px solid var(--ring);
   background: none;
   color: #fff;
   font-size: 16px;
   line-height: 1;
   cursor: pointer;
 }
-.task-item.done .task-check { background: #2563eb; border-color: #2563eb; }
+.task-item.done .task-check { background: var(--accent); border-color: var(--accent); }
 .task-title { flex: 1; word-break: break-word; }
-.task-item.done .task-title { color: #888; text-decoration: line-through; }
-.task-subtitle { font-size: 16px; color: #555; margin: 24px 0 8px; }
-.task-empty { color: #777; }
-.task-error { color: #c00; }
+.task-item.done .task-title { color: var(--text-3); text-decoration: line-through; }
+.task-subtitle { font-size: 16px; color: var(--text-2); margin: 24px 0 8px; }
+.task-empty { color: var(--text-2); }
+.task-error { color: var(--danger-text); }
