@@ -12,6 +12,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Второй мозг" />
     <title>Второй мозг</title>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('sb2_theme')
+          if (t === 'light' || t === 'dark') {
+            document.documentElement.setAttribute('data-theme', t)
+          }
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
