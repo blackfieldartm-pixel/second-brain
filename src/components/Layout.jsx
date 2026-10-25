@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Placeholder from '../pages/Placeholder.jsx'
+import Tasks from '../pages/Tasks.jsx'
 import './layout.css'
 
 const TABS = [
@@ -33,7 +34,11 @@ export default function Layout({ email, onSignOut }) {
           <span>{email}</span>
           <button className="link-button" onClick={onSignOut}>Выйти</button>
         </div>
-        <Placeholder title={tab.label} text={tab.text} />
+        {active === 'tasks' ? (
+          <Tasks />
+        ) : (
+          <Placeholder title={tab.label} text={tab.text} />
+        )}
       </main>
     </div>
   )
