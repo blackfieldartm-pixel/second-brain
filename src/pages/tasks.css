@@ -1,5 +1,71 @@
 .tasks { max-width: 640px; }
 
+/* Полоса проектов */
+.project-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.chip {
+  flex: none;
+  padding: 8px 14px;
+  font-size: 15px;
+  border: 2px solid #2563eb;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chip-add { border: 2px dashed #9ca3af; color: #555; }
+
+/* Форма создания проекта */
+.project-form {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 8px 0 16px;
+}
+
+.picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+
+.pick {
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: #f3f4f6;
+  cursor: pointer;
+}
+.pick.selected { border-color: #2563eb; background: #eef2ff; }
+
+.color-pick {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px #bbb;
+  cursor: pointer;
+}
+.color-pick.selected { box-shadow: 0 0 0 3px #111; }
+
+.form-actions { display: flex; gap: 8px; }
+.form-actions .task-add { padding: 12px 18px; }
+
+.secondary-button {
+  padding: 12px 18px;
+  font-size: 16px;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* Задачи */
 .task-form { display: flex; gap: 8px; margin: 12px 0 16px; }
 
 .task-input {

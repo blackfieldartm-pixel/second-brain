@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { fetchInboxTasks, addTask, setTaskDone } from '../lib/tasksApi.js'
+import { fetchTasks, addTask, setTaskDone } from '../lib/tasksApi.js'
+import { fetchProjects, addProject } from '../lib/projectsApi.js'
+import ProjectBar from '../components/ProjectBar.jsx'
 import './tasks.css'
 
 export default function Tasks() {
+  const [projects, setProjects] = useState([])
+  const [activeId, setActiveId] = useState(null)
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -10,11 +14,40 @@ export default function Tasks() {
   const [adding, setAdding] = useState(false)
 
   useEffect(() => {
-    fetchInboxTasks()
-      .then(setTasks)
-      .catch((e) => setError('Не удалось загрузить задачи: ' + e.message))
-      .finally(() => setLoading(false))
+    fetchProjects()
+      .then(setProjects)
+      .catch((e) => setError('Не удалось загрузить проекты: ' + e.message))
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setTasks([])
+    fetchTasks(activeId)
+      .then((data) => {
+        if (!cancelled) setTasks(data)
+      })
+      .catch((e) => {
+        if (!cancelled) setError('Не удалось загрузить задачи: ' + e.message)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [activeId])
+
+  function handleSelect(id) {
+    setError('')
+    setActiveId(id)
+  }
+
+  async function handleCreateProject(values) {
+    const created = await addProject(values)
+    setProjects((prev) => [...prev, created])
+    setActiveId(created.id)
+  }
 
   async function handleAdd(e) {
     e.preventDefault()
@@ -23,7 +56,7 @@ export default function Tasks() {
     setAdding(true)
     setError('')
     try {
-      const created = await addTask(text)
+      const created = await addTask(text, activeId)
       setTasks((prev) => [created, ...prev])
       setTitle('')
     } catch (err) {
@@ -49,6 +82,11 @@ export default function Tasks() {
     }
   }
 
+  const activeProject = projects.find((p) => p.id === activeId)
+  const heading = activeProject
+    ? (activeProject.emoji || '📁') + ' ' + activeProject.title
+    : 'Входящие'
+
   const openTasks = tasks.filter((t) => t.status !== 'done')
   const doneTasks = tasks.filter((t) => t.status === 'done')
 
@@ -71,7 +109,14 @@ export default function Tasks() {
 
   return (
     <div className="tasks">
-      <h1>Входящие</h1>
+      <ProjectBar
+        projects={projects}
+        activeId={activeId}
+        onSelect={handleSelect}
+        onCreate={handleCreateProject}
+      />
+
+      <h1>{heading}</h1>
 
       <form className="task-form" onSubmit={handleAdd}>
         <input
