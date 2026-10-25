@@ -1,0 +1,14 @@
+.heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.heading-row h1 { min-width: 0; word-break: break-word; }
+
+.edit-project {
+  flex: none;
+  padding: 8px 12px;
+  font-size: 14px;
+}

@@ -23,3 +23,31 @@ export async function addProject({ title, emoji, color }) {
   if (error) throw error
   return data
 }
+
+// Изменение проекта (название, эмодзи, цвет)
+export async function updateProject(id, fields) {
+  const { data, error } = await supabase
+    .from('projects')
+    .update(fields)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// Удаление проекта: задачи не пропадают, а переезжают во «Входящие»;
+// сам проект остаётся в базе, но нигде не показывается
+export async function deleteProject(id) {
+  const { error: tasksError } = await supabase
+    .from('tasks')
+    .update({ project_id: null })
+    .eq('project_id', id)
+  if (tasksError) throw tasksError
+
+  const { error } = await supabase
+    .from('projects')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id)
+  if (error) throw error
+}

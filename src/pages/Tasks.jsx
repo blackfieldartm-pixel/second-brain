@@ -7,12 +7,14 @@ import {
   updateTask,
   deleteTask,
 } from '../lib/tasksApi.js'
-import { fetchProjects, addProject } from '../lib/projectsApi.js'
+import { fetchProjects, addProject, updateProject, deleteProject } from '../lib/projectsApi.js'
 import { formatDue, isOverdue, dueAtDay, dueInView } from '../lib/dateUtils.js'
 import { SYSTEM_VIEWS, isSystemView } from '../lib/views.js'
 import ProjectBar from '../components/ProjectBar.jsx'
+import ProjectEditor from '../components/ProjectEditor.jsx'
 import TaskDetails from '../components/TaskDetails.jsx'
 import './tasks.css'
+import '../components/projecteditor.css'
 
 // Сначала задачи с ближайшим сроком, потом без срока; при равенстве выше приоритет, потом новее
 function sortOpen(a, b) {
@@ -50,6 +52,7 @@ export default function Tasks() {
   const [title, setTitle] = useState('')
   const [adding, setAdding] = useState(false)
   const [selected, setSelected] = useState(null)
+  const [editingProject, setEditingProject] = useState(false)
 
   const isSystem = isSystemView(view)
   const projectId = isSystem ? null : view
@@ -93,6 +96,19 @@ export default function Tasks() {
     const created = await addProject(values)
     setProjects((prev) => [...prev, created])
     setView(created.id)
+  }
+
+  async function handleSaveProject(fields) {
+    const updated = await updateProject(view, fields)
+    setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
+    setEditingProject(false)
+  }
+
+  async function handleDeleteProject() {
+    await deleteProject(view)
+    setProjects((prev) => prev.filter((p) => p.id !== view))
+    setEditingProject(false)
+    setView('inbox')
   }
 
   async function handleAdd(e) {
@@ -247,7 +263,18 @@ export default function Tasks() {
         onCreate={handleCreateProject}
       />
 
-      <h1>{heading}</h1>
+      <div className="heading-row">
+        <h1>{heading}</h1>
+        {activeProject && (
+          <button
+            type="button"
+            className="secondary-button edit-project"
+            onClick={() => setEditingProject(true)}
+          >
+            ✏️ Изменить
+          </button>
+        )}
+      </div>
 
       {showAddForm && (
         <form className="task-form" onSubmit={handleAdd}>
@@ -277,6 +304,16 @@ export default function Tasks() {
           onDelete={handleDeleteTask}
           onClose={() => setSelected(null)}
           onSubtasksChange={handleSubtasksChange}
+        />
+      )}
+
+      {editingProject && activeProject && (
+        <ProjectEditor
+          key={activeProject.id}
+          project={activeProject}
+          onSave={handleSaveProject}
+          onDelete={handleDeleteProject}
+          onClose={() => setEditingProject(false)}
         />
       )}
     </div>
